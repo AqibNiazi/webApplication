@@ -1,12 +1,13 @@
-package main
+package render
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
-	"text/template"
 )
 
-func renderTemplate(w http.ResponseWriter, html string) {
+// renderTemplate uses html template
+func RenderTemplate(w http.ResponseWriter, html string) {
 	parsedTemplate, _ := template.ParseFiles("./templates/" + html)
 	err := parsedTemplate.Execute(w, nil)
 	if err != nil {
