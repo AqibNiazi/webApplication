@@ -7,23 +7,29 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"webapplication/pkg/config"
 )
 
 var functions = template.FuncMap{}
+var app *config.Appconfig
+
+// NewTemplate sets the configuration for the template package
+func NewTemplates(a *config.Appconfig) {
+	app = a
+}
 
 // renderTemplate uses html template
 func RenderTemplate(w http.ResponseWriter, html string) {
-	tc, err := CreateTemplateCache()
-	if err != nil {
-		log.Fatal(err)
-	}
+	//get templateCache from appConfig
+	tc := app.TemplateCache
+
 	t, ok := tc[html]
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("could not get template from template cache")
 	}
 	buf := new(bytes.Buffer)
 	_ = t.Execute(buf, nil)
-	_, err = buf.WriteTo(w)
+	_, err := buf.WriteTo(w)
 	if err != nil {
 		fmt.Println("Error occured while writing to the browser", err)
 	}
