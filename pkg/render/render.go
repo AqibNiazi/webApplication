@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"webapplication/pkg/config"
+
+	"webapplication/pkg/models"
 )
 
 var functions = template.FuncMap{}
@@ -18,17 +20,28 @@ func NewTemplates(a *config.Appconfig) {
 	app = a
 }
 
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
 // renderTemplate uses html template
-func RenderTemplate(w http.ResponseWriter, html string) {
+func RenderTemplate(w http.ResponseWriter, html string, td *models.TemplateData) {
 	//get templateCache from appConfig
-	tc := app.TemplateCache
+	var tc map[string]*template.Template
+	if app.UseCache {
+
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
+	}
 
 	t, ok := tc[html]
 	if !ok {
 		log.Fatal("could not get template from template cache")
 	}
 	buf := new(bytes.Buffer)
-	_ = t.Execute(buf, nil)
+	td = AddDefaultData(td)
+	_ = t.Execute(buf, td)
 	_, err := buf.WriteTo(w)
 	if err != nil {
 		fmt.Println("Error occured while writing to the browser", err)
